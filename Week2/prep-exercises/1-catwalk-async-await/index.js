@@ -8,23 +8,50 @@ const DANCING_CAT_URL =
 
 function walk(img, startPos, stopPos) {
   return new Promise((resolve) => {
-    // Copy over the implementation from last week
+    let currentPosition = startPos;
+    img.style.left = currentPosition + 'px';
+
+    const step = () => {
+      currentPosition += STEP_SIZE_PX;
+      img.style.left = currentPosition + 'px';
+
+      if (currentPosition < stopPos) {
+        setTimeout(step, STEP_INTERVAL_MS);
+      } else {
+        resolve();
+      }
+    };
+
+    step();
   });
 }
 
 function dance(img) {
   return new Promise((resolve) => {
-    // Copy over the implementation from last week
+    const originalSrc = img.src;
+    img.src = DANCING_CAT_URL;
+
+    setTimeout(() => {
+      img.src = originalSrc;
+      resolve();
+    }, DANCE_TIME_MS);
   });
 }
 
-async function catWalk() {
+function startCatWalk() {
   const img = document.querySelector('img');
   const startPos = -img.width;
   const centerPos = (window.innerWidth - img.width) / 2;
   const stopPos = window.innerWidth;
 
-  // Use async/await syntax to loop the walk and dance functions
+  const catWalk = async () => {
+    await walk(img, startPos, centerPos);
+    await dance(img);
+    await walk(img, centerPos, stopPos);
+    startCatWalk(); // Recur to restart the process
+  };
+
+  catWalk();
 }
 
-window.addEventListener('load', catWalk);
+window.addEventListener('load', startCatWalk);
